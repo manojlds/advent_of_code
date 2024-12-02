@@ -1,8 +1,7 @@
-mod day1;
+mod days;
 
 fn main() {
-    if let Err(e) = day1::solve() {
-        eprintln!("Error: {}", e);
-        std::process::exit(1);
-    }
+    let _ = days::day1::part1::solve();
+    let _ = days::day1::part2::solve();
+    
 }

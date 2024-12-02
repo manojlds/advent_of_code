@@ -1,5 +1,6 @@
 use std::fs;
 
+
 pub fn solve() -> Result<(), Box<dyn std::error::Error>> {
     let input = fs::read_to_string("inputs/day1/input.txt")?;
 
@@ -24,7 +25,6 @@ pub fn solve() -> Result<(), Box<dyn std::error::Error>> {
         .map(|(a, b)| (a - b).abs())
         .sum();
 
-    println!("Output: {}", total_difference);
-
+    println!("Day 1 Part 1: {}", total_difference);
     Ok(())
 }
