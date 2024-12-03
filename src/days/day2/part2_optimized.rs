@@ -22,11 +22,11 @@ fn is_safe(report: Vec<i32>) -> bool {
         if trend == ReportState::Unknown {
             trend = current_trend;
         } else if trend != current_trend {
-                violations += 1;
-                if violations > 1 {
-                    return false;
-                }
-                continue;
+            violations += 1;
+            if violations > 1 {
+                return false;
+            }
+            continue;
         }
 
         if diff.abs() > 3 || diff == 0 {
@@ -34,8 +34,7 @@ fn is_safe(report: Vec<i32>) -> bool {
             if violations > 1 {
                 return false;
             }
-        }
-        
+        } 
     }
     true
 }
