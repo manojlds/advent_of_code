@@ -14,5 +14,8 @@ fn main() {
 
     let _ = days::day4::part1::solve();
     let _ = days::day4::part2::solve();
+
+    let _ = days::day5::part1::solve();
+    let _ = days::day5::part2::solve();
     
 }
