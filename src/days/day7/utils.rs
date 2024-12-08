@@ -19,43 +19,33 @@ pub fn read_input() -> io::Result<Vec<(i64, Vec<i64>)>> {
     return Ok(input_structured);
 }
 
-fn find_recursive(result: i64, operands: &Vec<i64>, operators: &mut Vec<String>, current: i64, index: usize, is_part2: bool) -> bool {
+fn find_recursive(result: i64, operands: &Vec<i64>, current: i64, index: usize, is_part2: bool) -> bool {
     if index == operands.len() {
         return current == result;
     }
 
-    operators.push(String::from("+"));
-    if find_recursive(result, operands, operators, current + operands[index], index + 1, is_part2) {
+    if find_recursive(result, operands, current + operands[index], index + 1, is_part2) {
         return true;
     }
-    operators.pop();
     
-    operators.push(String::from("*"));
-    if find_recursive(result, operands, operators, current * operands[index], index + 1, is_part2) {
+    if find_recursive(result, operands, current * operands[index], index + 1, is_part2) {
         return true;
     }
-
-    operators.pop();
 
     if is_part2 {
-        operators.push(String::from("||"));
+
         let concatenated = format!("{}{}", current, operands[index]);
         let concatenated_int = concatenated.parse::<i64>().unwrap();
-        if find_recursive(result, operands, operators, concatenated_int, index + 1, is_part2) {
+        if find_recursive(result, operands, concatenated_int, index + 1, is_part2) {
             return true;
         }
     }
-
-    operators.pop();
 
     return false;
 }
 
 fn find_expression(result: i64, operands: Vec<i64>, is_part2: bool) -> bool {
-
-    let mut operators: Vec<String> = Vec::new();
-
-    if find_recursive(result, &operands, &mut operators, operands[0], 1, is_part2) {
+    if find_recursive(result, &operands, operands[0], 1, is_part2) {
         return true;
     }
 
