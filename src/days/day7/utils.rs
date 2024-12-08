@@ -33,7 +33,6 @@ fn find_recursive(result: i64, operands: &Vec<i64>, current: i64, index: usize, 
     }
 
     if is_part2 {
-
         let concatenated = format!("{}{}", current, operands[index]);
         let concatenated_int = concatenated.parse::<i64>().unwrap();
         if find_recursive(result, operands, concatenated_int, index + 1, is_part2) {
