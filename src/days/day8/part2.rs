@@ -10,13 +10,13 @@ pub fn solve() -> Result<(), Box<dyn std::error::Error>> {
     for antennas in map.values() {
         for (i, coord1) in antennas.iter().enumerate() {
             for coord2 in antennas.iter().skip(i + 1) {
-                let nodes = find_anti_nodes(coord1, coord2, bounds, false);
+                let nodes = find_anti_nodes(coord1, coord2, bounds, true);
                 anti_nodes.extend(nodes);
             }
         }
     }
-    
-    println!("Day 8 Part 1: {}", anti_nodes.len());
+
+    println!("Day 8 Part 2: {}", anti_nodes.len());
 
     Ok(())
 }

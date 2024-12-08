@@ -18,7 +18,7 @@ pub fn read_input() -> io::Result<(HashMap<char, Vec<Coord>>, (i32, i32))> {
 
     for (i, line) in lines.iter().enumerate() {
         for (j, c) in line.chars().enumerate() {
-            if c == '.' {
+            if ['.', '#'].contains(&c) {
                 continue;
             }
             let coord = Coord { x: i as i32, y: j as i32};
@@ -30,24 +30,38 @@ pub fn read_input() -> io::Result<(HashMap<char, Vec<Coord>>, (i32, i32))> {
 
 
 
-pub fn find_anti_nodes(coord1: &Coord, coord2: &Coord, bounds: (i32, i32)) -> Vec<Coord> {
+pub fn find_anti_nodes(coord1: &Coord, coord2: &Coord, bounds: (i32, i32), is_part2: bool) -> Vec<Coord> {
     let mut antinodes = Vec::new();
 
-    let x_offset = (coord1.x - coord2.x);
-    let y_offset = (coord1.y - coord2.y);
+    let x_offset = coord1.x - coord2.x;
+    let y_offset = coord1.y - coord2.y;
 
-    let x1 = coord1.x + x_offset;
-    let y1 = coord1.y + y_offset;
-    
-    let x2 = coord2.x - x_offset;
-    let y2 = coord2.y - y_offset;
+    let iterators: (Box<dyn Iterator<Item = i32>>, Box<dyn Iterator<Item = i32>>) = if is_part2 {
+        (Box::new(0..), Box::new(0..))
+    } else {
+        (Box::new([1].iter().copied()), Box::new([1].iter().copied()))
+    };
 
-    if x1 >= 0 && x1 < bounds.0 && y1 >= 0 && y1 < bounds.1 {
-        antinodes.push(Coord{x: x1, y: y1});
+    for i in iterators.0 {
+        let x1 = coord1.x + i * x_offset;
+        let y1 = coord1.y + i * y_offset;
+
+        if x1 >= 0 && x1 < bounds.0 && y1 >= 0 && y1 < bounds.1 {
+            antinodes.push(Coord{x: x1, y: y1});
+        } else {
+            break;
+        }
     }
     
-    if x2 >=0 && x2 < bounds.0 && y2 >= 0 && y2 < bounds.1 {
-        antinodes.push(Coord{x: x2, y: y2});
+    for i in iterators.1 {
+        let x1 = coord2.x - i * x_offset;
+        let y1 = coord2.y - i * y_offset;
+
+        if x1 >= 0 && x1 < bounds.0 && y1 >= 0 && y1 < bounds.1 {
+            antinodes.push(Coord{x: x1, y: y1});
+        } else {
+            break;
+        }
     }
 
     return antinodes; 
