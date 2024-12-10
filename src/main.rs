@@ -1,4 +1,5 @@
 use std::env;
+use std::time::Instant;
 mod days;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -12,7 +13,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let day = &args[1];
     let part = &args[2];
 
-    match (day.as_str(), part.as_str()) {
+    let start = Instant::now();
+
+    let result = match (day.as_str(), part.as_str()) {
         ("day1", "part1") => days::day1::part1::solve(),
         ("day1", "part2") => days::day1::part2::solve(),
         ("day2", "part1") => days::day2::part1::solve(),
@@ -37,5 +40,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             eprintln!("Invalid day or part. Usage: cargo run <day> <part>");
             Ok(())
         }
+    };
+
+    let duration = start.elapsed();
+
+    match &result {
+        Ok(_) => println!("Execution time: {:.2?}", duration),
+        Err(err) => eprintln!("Error occurred: {} (Execution time: {:.2?})", err, duration),
     }
+
+    result
 }
