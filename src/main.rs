@@ -27,4 +27,7 @@ fn main() {
     let _ = days::day8::part1::solve();
     let _ = days::day8::part2::solve();
     
+    let _ = days::day9::part1::solve();
+    let _ = days::day9::part2::solve();
+    
 }
