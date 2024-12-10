@@ -54,7 +54,6 @@ pub fn pack2(input: &mut Vec<String>) {
     let len = input.len();
     let mut left = 0;
     let mut right = len - 1;
-    let mut run = 0;
 
     while right > left {
         while left < len && input[left] != "." {
