@@ -39,23 +39,23 @@ impl Region {
 }
 
 impl Direction {
-    pub fn to_offset(&self) -> (i32, i32) {
+    pub fn to_offset(&self) -> Coord {
         match self {
-            Direction::North => (-1, 0),
-            Direction::East => (0, 1),
-            Direction::South => (1, 0),
-            Direction::West => (0, -1),
+            Direction::North => Coord::new(-1, 0),
+            Direction::East => Coord::new(0, 1),
+            Direction::South => Coord::new(1, 0),
+            Direction::West => Coord::new(0, -1),
         }
     }
 }
 
 impl Coord {
+    pub fn new(x: i32, y: i32) -> Coord {
+        Coord { x, y }
+    }
+
     pub fn next_coord(&self, direction: &Direction) -> Coord {
-        let (dx, dy) = direction.to_offset();
-        Coord {
-            x: self.x + dx,
-            y: self.y + dy,
-        }
+        *self + direction.to_offset()
     }
 
     pub fn is_within_bounds(&self, grid: &Vec<Vec<char>>) -> bool {
