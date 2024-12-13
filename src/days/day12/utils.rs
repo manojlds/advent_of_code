@@ -4,6 +4,7 @@ use std::fs;
 use std::collections::HashSet;
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
+use std::ops::Add;
 
 #[derive(Debug, Hash, Eq, PartialEq, Clone, Copy)]
 pub struct Coord {
@@ -23,12 +24,17 @@ pub enum Direction {
 pub struct Region {
     pub id: char,
     pub area: i32,
-    pub perimeter: i32
+    pub perimeter: i32,
+    pub corners: i32
 }
 
 impl Region {
     pub fn cost(&self) -> i32 {
         self.area * self.perimeter
+    }
+
+    pub fn bulk_cost(&self) -> i32 {
+        self.area * self.corners
     }
 }
 
@@ -57,6 +63,40 @@ impl Coord {
     }
 }
 
+static CORNERS: [[Coord; 3]; 4] = [
+    [
+        Coord { x: -1, y: -1 },
+        Coord { x: -1, y: 0 },
+        Coord { x: 0, y: -1 },
+    ],
+    [
+        Coord { x: 1, y: -1 },
+        Coord { x: 1, y: 0 },
+        Coord { x: 0, y: -1 },
+    ],
+    [
+        Coord { x: 1, y: 1 },
+        Coord { x: 1, y: 0 },
+        Coord { x: 0, y: 1 },
+    ],
+    [
+        Coord { x: -1, y: 1 },
+        Coord { x: -1, y: 0 },
+        Coord { x: 0, y: 1 },
+    ],
+];
+
+impl Add for Coord {
+    type Output = Coord;
+
+    fn add(self, other: Coord) -> Coord {
+        Coord {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
+    }
+}
+
 pub fn read_input() -> io::Result<Vec<Vec<char>>> {
     let input = fs::read_to_string("inputs/day12/input.txt")?;
     let grid = input
@@ -66,16 +106,18 @@ pub fn read_input() -> io::Result<Vec<Vec<char>>> {
     Ok(grid)
 }
 
-pub fn find_region(cell: &char, current_coord: Coord, grid: &Vec<Vec<char>>) -> (i32, i32, HashSet<Coord>) {
+pub fn find_region(cell: &char, current_coord: Coord, grid: &Vec<Vec<char>>) -> (i32, i32, i32, HashSet<Coord>) {
     let mut stack = vec![current_coord];
     let mut visited: HashSet<Coord> = HashSet::new();
     let mut boundary_edges = 0;
+    let mut corners = 0;
 
     while let Some(coord) = stack.pop() {
         if visited.contains(&coord) {
             continue;
         }
         visited.insert(coord);
+        corners += find_corners(cell, coord, grid);
 
         for direction in Direction::iter() {
             let next_coord = coord.next_coord(&direction);
@@ -83,12 +125,32 @@ pub fn find_region(cell: &char, current_coord: Coord, grid: &Vec<Vec<char>>) -> 
             if !next_coord.is_within_bounds(grid) || grid[next_coord.x as usize][next_coord.y as usize] != *cell {
                 boundary_edges += 1;
             } else if !visited.contains(&next_coord) {
+                
                 stack.push(next_coord);
             }
         }
     }
 
-    (visited.len() as i32, boundary_edges, visited)
+    (visited.len() as i32, boundary_edges, corners, visited)
+}
+
+pub fn find_corners(cell: &char, current_coord: Coord, grid: &Vec<Vec<char>>) -> i32 {
+    CORNERS
+            .iter()
+            .filter(|corner| {
+                let opp_coord = current_coord + corner[0];
+                let first_coord = current_coord + corner[1];
+                let second_coord = current_coord + corner[2];
+
+                let opp_value = grid.get(opp_coord.x as usize).and_then(|row| row.get(opp_coord.y as usize)).unwrap_or(&' ');
+                let first_value = grid.get(first_coord.x as usize).and_then(|row| row.get(first_coord.y as usize)).unwrap_or(&' ');
+                let second_value = grid.get(second_coord.x as usize).and_then(|row| row.get(second_coord.y as usize)).unwrap_or(&' ');
+
+                (cell != first_value && cell != second_value) || (cell == first_value && cell == second_value && cell != opp_value)
+
+            })
+            .count() as i32
+
 }
 
 pub fn build_regions(grid: Vec<Vec<char>>) -> Vec<Region> {
@@ -100,12 +162,13 @@ pub fn build_regions(grid: Vec<Vec<char>>) -> Vec<Region> {
             if visited.contains(&current_coord) {
                 continue;
             }
-            let (new_area, new_perimeter, new_visited) = find_region(&cell, current_coord, &grid);
+            let (new_area, new_perimeter, new_corners, new_visited) = find_region(&cell, current_coord, &grid);
 
             regions.push(Region {
                 id: cell,
                 area: new_area,
                 perimeter: new_perimeter,
+                corners: new_corners
             });
 
             visited.extend(new_visited);
@@ -117,4 +180,9 @@ pub fn build_regions(grid: Vec<Vec<char>>) -> Vec<Region> {
 pub fn cost(grid: Vec<Vec<char>>) -> i32 {
     let regions = build_regions(grid);
     regions.iter().map(|region| region.cost()).sum::<i32>()
+}
+
+pub fn bulk_cost(grid: Vec<Vec<char>>) -> i32 {
+    let regions = build_regions(grid);
+    regions.iter().map(|region| region.bulk_cost()).sum::<i32>()
 }
