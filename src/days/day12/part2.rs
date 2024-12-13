@@ -5,7 +5,7 @@ pub fn solve() -> Result<(), Box<dyn std::error::Error>> {
 
     let output = cost(grid);
 
-    println!("Day 12 Part 1: {:?}", output);
+    println!("Day 12 Part 2: {:?}", output);
     
     Ok(())
 }
