@@ -63,7 +63,7 @@ impl Coord {
     }
 }
 
-static CORNERS: [[Coord; 3]; 4] = [
+static CORNERS_OFFSET: [[Coord; 3]; 4] = [
     [
         Coord { x: -1, y: -1 },
         Coord { x: -1, y: 0 },
@@ -135,7 +135,7 @@ pub fn find_region(cell: &char, current_coord: Coord, grid: &Vec<Vec<char>>) -> 
 }
 
 pub fn find_corners(cell: &char, current_coord: Coord, grid: &Vec<Vec<char>>) -> i32 {
-    CORNERS
+    CORNERS_OFFSET
             .iter()
             .filter(|corner| {
                 let opp_coord = current_coord + corner[0];
