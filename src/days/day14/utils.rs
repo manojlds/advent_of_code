@@ -3,6 +3,13 @@ use std::fs;
 use regex::Regex;
 use strum_macros::EnumIter;
 use std::collections::{HashMap, HashSet};
+use clust::Client;
+use clust::messages::ClaudeModel;
+use clust::messages::MaxTokens;
+use clust::messages::MessagesRequestBody;
+use clust::messages::SystemPrompt;
+use clust::messages::Message;
+use anyhow::{Context, Result};
 
 
 #[derive(Debug, Hash, Eq, PartialEq, Clone, Copy)]
@@ -54,7 +61,7 @@ impl Grid {
         }
     }
 
-    pub fn print(&self) {
+    pub fn grid_for_print(&self) -> String {
         let mut grid: Vec<Vec<String>> = vec![vec![String::from("."); self.width as usize]; self.height as usize];
 
         for robot in self.robots.iter() {
@@ -66,9 +73,15 @@ impl Grid {
             }
         }
 
-        for row in grid.iter() {
-            println!("{}", row.join(""));
-        }
+        let rows: Vec<String> = grid.into_iter()
+            .map(|row| row.join("")) // Join each row into a single string
+            .collect();
+
+        rows.join("\n")
+    }
+
+    pub fn print(&self) {
+        println!("{}", self.grid_for_print());
 
         println!()
     }
@@ -83,9 +96,7 @@ impl Grid {
         }
 
         if print {
-            print!("\x1B[2J\x1B[1;1H");
             self.print();
-            io::stdout().flush().unwrap();
         }
     }
 

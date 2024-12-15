@@ -5,7 +5,7 @@ pub fn solve() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut grid = Grid::new(101, 103, inputs);
 
-    for t in 0..10000{
+    for _ in 0..100{
         grid.tick(false);
     }
 
