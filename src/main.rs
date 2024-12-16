@@ -46,6 +46,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ("day13", "part2") => days::day13::part2::solve(),
         ("day14", "part1") => days::day14::part1::solve(),
         ("day14", "part2") => days::day14::part2::solve(),
+        ("day15", "part1") => days::day15::part1::solve(),
+        ("day15", "part2") => days::day15::part2::solve(),
         _ => {
             eprintln!("Invalid day or part. Usage: cargo run <day> <part>");
             Ok(())
