@@ -32,13 +32,40 @@ pub struct Robot {
     coord: Coord,
 }
 
-impl Robot {
-    
+#[derive(PartialEq, Clone, Copy, Debug)]
+enum Element {
+    Empty,
+    Wall,
+    Obstacle,
+    Robot
 }
+
+impl From<char> for Element {
+    fn from(value: char) -> Self {
+        match value {
+            '#' => Self::Wall,
+            'O' => Self::Obstacle,
+            '@' => Self::Robot,
+            _ => Self::Empty,
+        }
+    }
+}
+
+impl From<Element> for char {
+    fn from(val: Element) -> Self {
+        match val {
+            Element::Empty => '.',
+            Element::Wall => '#',
+            Element::Obstacle => 'O',
+            Element::Robot => '@',
+        }
+    }
+}
+
 
 #[derive(Debug)]
 pub struct Grid {
-    grid: Vec<Vec<char>>,
+    grid: Vec<Vec<Element>>,
     robot: Robot
 }
 
@@ -52,8 +79,9 @@ impl Grid {
         for (i, line) in input.lines().enumerate() {
             grid.push(Vec::new());
             for (j,c) in line.chars().enumerate() {
-                grid[i].push(c);
-                if c == '@' {
+                let element = Element::from(c);
+                grid[i].push(element);
+                if element == Element::Robot {
                     robot.coord = Coord { x: i as i32, y: j as i32 };
                 }
             }
@@ -66,7 +94,7 @@ impl Grid {
 
     pub fn print_grid(&self) {
         for row in &self.grid {
-            println!("{}", row.iter().collect::<String>());
+            println!("{}", row.iter().map(|&e| char::from(e)).collect::<String>());
         }
 
         println!()
@@ -86,16 +114,16 @@ impl Grid {
         let offset = direction.to_offset();
         let (new_x, new_y) = (self.robot.coord.x as i32 + offset.0, self.robot.coord.y as i32 + offset.1);
 
-        if self.grid[new_x as usize][new_y as usize] == '#' {
+        if self.grid[new_x as usize][new_y as usize] == Element::Wall {
             return;
         }
-        if self.grid[new_x as usize][new_y as usize] == '.' {
-            self.grid[new_x as usize][new_y as usize] = '@';
-            self.grid[self.robot.coord.x as usize][self.robot.coord.y as usize] = '.';
+        if self.grid[new_x as usize][new_y as usize] == Element::Empty {
+            self.grid[new_x as usize][new_y as usize] = Element::Robot;
+            self.grid[self.robot.coord.x as usize][self.robot.coord.y as usize] = Element::Empty;
             self.robot.coord = Coord { x: new_x, y: new_y };
             return;
         }
-        if self.grid[new_x as usize][new_y as usize] == 'O' {
+        if self.grid[new_x as usize][new_y as usize] == Element::Obstacle {
             let mut obstacle_x = new_x;
             let mut obstacle_y = new_y;
 
@@ -103,18 +131,18 @@ impl Grid {
                 obstacle_x += offset.0;
                 obstacle_y += offset.1;
 
-                if self.grid[obstacle_x as usize][obstacle_y as usize] != 'O' {
+                if self.grid[obstacle_x as usize][obstacle_y as usize] != Element::Obstacle {
                     break;
                 }
             }
 
-            if self.grid[obstacle_x as usize][obstacle_y as usize] == '#' {
+            if self.grid[obstacle_x as usize][obstacle_y as usize] == Element::Wall {
                 return;
             }
 
-            self.grid[obstacle_x as usize][obstacle_y as usize] = 'O';
-            self.grid[new_x as usize][new_y as usize] = '@';
-            self.grid[self.robot.coord.x as usize][self.robot.coord.y as usize] = '.';
+            self.grid[obstacle_x as usize][obstacle_y as usize] = Element::Obstacle;
+            self.grid[new_x as usize][new_y as usize] = Element::Robot;
+            self.grid[self.robot.coord.x as usize][self.robot.coord.y as usize] = Element::Empty;
             self.robot.coord = Coord { x: new_x, y: new_y };
             
         }
@@ -132,7 +160,7 @@ impl Grid {
         let mut sum: i32 = 0;
         for (i, row) in self.grid.iter().enumerate() {
             for (j, c) in row.iter().enumerate() {
-                if *c == 'O' {
+                if *c == Element::Obstacle {
                     sum += 100 * (i as i32) + (j as i32);        
                 }
             }
