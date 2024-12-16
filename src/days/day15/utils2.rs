@@ -81,6 +81,18 @@ impl Element {
     }
 }
 
+impl Element {
+    fn to_colored_char(self) -> String {
+        match self {
+            Element::Empty => format!("\x1B[90m{}\x1B[0m", '.'),          // Gray for empty
+            Element::Wall => format!("\x1B[37;1m{}\x1B[0m", '#'),         // Bright white for walls
+            Element::Obstacle => format!("\x1B[33m{}\x1B[0m", 'O'),       // Yellow for obstacles
+            Element::Robot => format!("\x1B[32;1m{}\x1B[0m", '@'),        // Bright green for the robot
+            Element::ObstacleLeft => format!("\x1B[31m{}\x1B[0m", '['),   // Red for obstacle left
+            Element::ObstacleRight => format!("\x1B[31m{}\x1B[0m", ']'),  // Red for obstacle right
+        }
+    }
+}
 
 impl From<char> for Element {
     fn from(value: char) -> Self {
@@ -107,7 +119,6 @@ impl From<Element> for char {
         }
     }
 }
-
 
 #[derive(Debug)]
 pub struct Grid {
@@ -142,7 +153,7 @@ impl Grid {
         print!("\x1B[2J\x1B[H");
         println!("Robot is at: {:?}", self.robot.coord);
         for row in &self.grid {
-            println!("{}", row.iter().map(|&e| char::from(e)).collect::<String>());
+            println!("{}", row.iter().map(|&e| e.to_colored_char()).collect::<String>());
         }
         io::stdout().flush().unwrap();
 
@@ -192,8 +203,6 @@ impl Grid {
         let new_coord = current_coord + direction;
         let next_element = self.grid[new_coord.x as usize][new_coord.y as usize];
 
-        // println!("New coord: {:?}. Next element: {:?}", new_coord, next_element);
-
         match next_element {
             Element::Empty => true,
             Element::Wall => false,
@@ -229,12 +238,14 @@ impl Grid {
         }
     }
 
-    pub fn process_commands(&mut self, commands: Vec<char>) {
+    pub fn process_commands(&mut self, commands: Vec<char>, visualize: bool) {
         for c in commands {
-            println!("Command: {}", c);
             self.move_robot_char(c);
-            self.print_grid();
-            // std::thread::sleep(std::time::Duration::from_millis(200));
+            
+            if visualize {
+                self.print_grid();
+                std::thread::sleep(std::time::Duration::from_millis(200));
+            }
         }
     }
 
