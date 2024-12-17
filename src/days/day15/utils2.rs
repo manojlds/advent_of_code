@@ -84,12 +84,12 @@ impl Element {
 impl Element {
     fn to_colored_char(self) -> String {
         match self {
-            Element::Empty => format!("\x1B[90m{}\x1B[0m", '.'),          // Gray for empty
-            Element::Wall => format!("\x1B[37;1m{}\x1B[0m", '#'),         // Bright white for walls
-            Element::Obstacle => format!("\x1B[33m{}\x1B[0m", 'O'),       // Yellow for obstacles
-            Element::Robot => format!("\x1B[32;1m{}\x1B[0m", '@'),        // Bright green for the robot
-            Element::ObstacleLeft => format!("\x1B[31m{}\x1B[0m", '['),   // Red for obstacle left
-            Element::ObstacleRight => format!("\x1B[31m{}\x1B[0m", ']'),  // Red for obstacle right
+            Element::Empty => format!("\x1B[90m{}\x1B[0m", '.'),
+            Element::Wall => format!("\x1B[37;1m{}\x1B[0m", '#'),
+            Element::Obstacle => format!("\x1B[33m{}\x1B[0m", 'O'),
+            Element::Robot => format!("\x1B[32;1m{}\x1B[0m", '@'),
+            Element::ObstacleLeft => format!("\x1B[31m{}\x1B[0m", '['),
+            Element::ObstacleRight => format!("\x1B[31m{}\x1B[0m", ']'),
         }
     }
 }
