@@ -139,14 +139,18 @@ impl Grid {
         self.grid[coord.x as usize][coord.y as usize]
     }
 
-    pub fn race_path(&self) -> Vec<Coord> {
+    pub fn race_path(&self) -> (Vec<Coord>, HashMap<Coord, usize>) {
         let mut path = Vec::new();
+        let mut distances = HashMap::new();
         let mut current_coord = self.start;
         let mut visited: HashSet<Coord> = HashSet::new();
-
+        let mut distance = 0;
         loop {
             path.push(current_coord);
             visited.insert(current_coord);
+            distances.insert(current_coord, distance);
+            distance += 1;
+            
             if current_coord == self.end {
                 break;
             }
@@ -158,52 +162,42 @@ impl Grid {
                 }
             }
         }
-        path
+        (path, distances)
     }
 
-    pub fn duration(first: Coord, second: Coord, path: Vec<Coord>) -> usize {
-        let i = path.iter().position(|&c| c == first).unwrap();
-        let j = path.iter().position(|&c| c == second).unwrap();
-
-        let (from, to) = if i <= j { (i, j) } else { (j, i) };
-
-        //Distance in path discounting the two new steps while cheating
-        to - from - 2
+    pub fn duration(first: Coord, second: Coord, distances: &HashMap<Coord, usize>) -> usize {
+        let from = *distances.get(&first).unwrap();
+        let to = *distances.get(&second).unwrap();
+        to - from
     }
 
-    pub fn is_cheat_pair(&self, first: Coord, second: Coord) -> bool {
-        for (neigbour_c, neighbour_d) in self.neighbours(first) {
-            if self.element_at(neigbour_c) == Element::Wall {
-                
-                if self.neighbours(second).contains(&(neigbour_c, neighbour_d.opposite())) {
-                    return true;
-                }
-            }
-        }
-        false
+    pub fn get_distance(&self, first: Coord, second: Coord) -> usize {
+        let distance = (first.x - second.x).abs() + (first.y - second.y).abs();
+        
+        distance as usize
     }
 
     pub fn neighbours(&self, coord: Coord) -> HashSet<(Coord, Direction)> {
         Direction::iter()
             .map(|d| (coord + d, d))
-            .filter(|(c,d)| self.is_within_bounds(*c))
+            .filter(|(c, _)| self.is_within_bounds(*c))
             .collect()
     }
 
-    pub fn find_cheats(&self, min_duration: usize) -> HashMap<usize, usize> {
-        let path = self.race_path();
+    pub fn find_cheats(&self, min_duration: usize, allowed_distance: usize) -> HashMap<usize, usize> {
+        let (path, distances) = self.race_path();
         let mut cheats  = HashMap::new();
 
-        for x in 0..path.len() {
-            for y in (x + min_duration - 2)..path.len() {
+        for x in 0..(path.len() - min_duration) {
+            for y in (x + min_duration)..path.len() {
                 let first = path[x];
                 let second = path[y];
-
-                if self.is_cheat_pair(first, second) {
-
-                    let duration = Grid::duration(first, second, path.clone());
-                    println!("{} -> {} is a cheat pair with duration {}", first, second, duration);
-                    *cheats.entry(duration).or_default() += 1
+                let distance = self.get_distance(first, second);
+                if distance <= allowed_distance {
+                    let duration = Grid::duration(first, second, &distances);
+                    //Current duration minus the new cheat distance gives the duration saved
+                    let duration_saved = duration - distance;
+                    *cheats.entry(duration_saved).or_default() += 1
                 }
             }
         }
